@@ -1,331 +1,124 @@
 package com.globobank.fraud.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
+
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
 
 /**
- * Risk assessment response model for GloboBank Fraud Detection Service.
+ * Simple risk assessment response model for GloboBank Fraud Detection Service.
  * 
- * Represents the fraud risk analysis result for a transaction request, including risk score,
- * recommendation, detailed risk factors, and processing metadata for audit and compliance purposes.
+ * Contains only the essential fields required by the OpenAPI specification: - riskScore: Integer
+ * from 0-1000 indicating fraud risk level - fraudulent: Boolean flag indicating if transaction is
+ * fraudulent - timestamp: ISO8601 timestamp when assessment was performed
  * 
- * This model provides comprehensive fraud analysis results that enable downstream systems to make
- * informed decisions about transaction approval, additional verification requirements, or
- * transaction blocking.
+ * This simplified model matches the OpenAPI contract and supports the basic fraud detection logic:
+ * 1000 for fraudulent cards, 0 for clean cards.
  * 
  * @author GloboBank Fraud Detection Team
  * @version 1.0.0
  * @since 2025-10-21
  */
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class RiskAssessment {
 
     /**
-     * Original transaction ID for correlation and audit purposes.
-     */
-    @NotBlank(message = "Transaction ID is required")
-    @JsonProperty("transactionId")
-    private String transactionId;
-
-    /**
-     * Account number associated with the risk assessment.
-     */
-    @NotBlank(message = "Account number is required")
-    @JsonProperty("accountNumber")
-    private String accountNumber;
-
-    /**
-     * Numerical risk score between 0 (no risk) and 100 (highest risk). Used for automated decision
-     * making and risk thresholds.
+     * Risk score from 0 to 1000. 0 = no fraud risk (card not in fraudulent_cards table) 1000 =
+     * maximum fraud risk (card found in fraudulent_cards table)
      */
     @NotNull(message = "Risk score is required")
-    @DecimalMin(value = "0.0", message = "Risk score must be between 0 and 100")
-    @DecimalMax(value = "100.0", message = "Risk score must be between 0 and 100")
+    @Min(value = 0, message = "Risk score must be between 0 and 1000")
+    @Max(value = 1000, message = "Risk score must be between 0 and 1000")
     @JsonProperty("riskScore")
-    private Double riskScore;
+    private Integer riskScore;
 
     /**
-     * Risk level classification based on score thresholds. Provides human-readable risk
-     * categorization.
+     * Boolean flag indicating if the transaction is fraudulent. true = card number found in
+     * fraudulent_cards table false = card number not found in fraudulent_cards table
      */
-    @NotNull(message = "Risk level is required")
-    @JsonProperty("riskLevel")
-    private RiskLevel riskLevel;
+    @NotNull(message = "Fraudulent flag is required")
+    @JsonProperty("fraudulent")
+    private Boolean fraudulent;
 
     /**
-     * Processing recommendation for the transaction. Guides downstream systems on appropriate
-     * action.
+     * ISO8601 timestamp when the risk assessment was performed.
      */
-    @NotNull(message = "Recommendation is required")
-    @JsonProperty("recommendation")
-    private Recommendation recommendation;
-
-    /**
-     * Timestamp when the risk assessment was completed.
-     */
-    @NotNull(message = "Assessment timestamp is required")
+    @NotNull(message = "Timestamp is required")
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @JsonProperty("assessmentTimestamp")
-    private LocalDateTime assessmentTimestamp;
+    @JsonProperty("timestamp")
+    private LocalDateTime timestamp;
 
     /**
-     * Processing time in milliseconds for performance monitoring.
+     * Default constructor for JSON deserialization.
      */
-    @Min(value = 0, message = "Processing time must be non-negative")
-    @JsonProperty("processingTimeMs")
-    private Long processingTimeMs;
-
-    /**
-     * Detailed risk factors that contributed to the overall score. Provides transparency and
-     * enables investigation of fraud patterns.
-     */
-    @JsonProperty("riskFactors")
-    private List<RiskFactor> riskFactors;
-
-    /**
-     * Additional context and metadata for the assessment. May include model versions, configuration
-     * parameters, etc.
-     */
-    @JsonProperty("metadata")
-    private Map<String, Object> metadata;
-
-    /**
-     * Correlation ID for request tracing and debugging.
-     */
-    @JsonProperty("correlationId")
-    private String correlationId;
-
-    // Default constructor for JSON deserialization
     public RiskAssessment() {}
 
-    // Constructor with required fields
-    public RiskAssessment(String transactionId, String accountNumber, Double riskScore,
-            RiskLevel riskLevel, Recommendation recommendation) {
-        this.transactionId = transactionId;
-        this.accountNumber = accountNumber;
+    /**
+     * Constructor with all required fields.
+     * 
+     * @param riskScore Risk score from 0-1000
+     * @param fraudulent Fraudulent flag
+     * @param timestamp Assessment timestamp
+     */
+    public RiskAssessment(Integer riskScore, Boolean fraudulent, LocalDateTime timestamp) {
         this.riskScore = riskScore;
-        this.riskLevel = riskLevel;
-        this.recommendation = recommendation;
-        this.assessmentTimestamp = LocalDateTime.now();
+        this.fraudulent = fraudulent;
+        this.timestamp = timestamp;
     }
 
     // Getters and setters
 
-    public String getTransactionId() {
-        return transactionId;
-    }
-
-    public void setTransactionId(String transactionId) {
-        this.transactionId = transactionId;
-    }
-
-    public String getAccountNumber() {
-        return accountNumber;
-    }
-
-    public void setAccountNumber(String accountNumber) {
-        this.accountNumber = accountNumber;
-    }
-
-    public Double getRiskScore() {
+    public Integer getRiskScore() {
         return riskScore;
     }
 
-    public void setRiskScore(Double riskScore) {
+    public void setRiskScore(Integer riskScore) {
         this.riskScore = riskScore;
     }
 
-    public RiskLevel getRiskLevel() {
-        return riskLevel;
+    public Boolean getFraudulent() {
+        return fraudulent;
     }
 
-    public void setRiskLevel(RiskLevel riskLevel) {
-        this.riskLevel = riskLevel;
+    public void setFraudulent(Boolean fraudulent) {
+        this.fraudulent = fraudulent;
     }
 
-    public Recommendation getRecommendation() {
-        return recommendation;
+    public LocalDateTime getTimestamp() {
+        return timestamp;
     }
 
-    public void setRecommendation(Recommendation recommendation) {
-        this.recommendation = recommendation;
-    }
-
-    public LocalDateTime getAssessmentTimestamp() {
-        return assessmentTimestamp;
-    }
-
-    public void setAssessmentTimestamp(LocalDateTime assessmentTimestamp) {
-        this.assessmentTimestamp = assessmentTimestamp;
-    }
-
-    public Long getProcessingTimeMs() {
-        return processingTimeMs;
-    }
-
-    public void setProcessingTimeMs(Long processingTimeMs) {
-        this.processingTimeMs = processingTimeMs;
-    }
-
-    public List<RiskFactor> getRiskFactors() {
-        return riskFactors;
-    }
-
-    public void setRiskFactors(List<RiskFactor> riskFactors) {
-        this.riskFactors = riskFactors;
-    }
-
-    public Map<String, Object> getMetadata() {
-        return metadata;
-    }
-
-    public void setMetadata(Map<String, Object> metadata) {
-        this.metadata = metadata;
-    }
-
-    public String getCorrelationId() {
-        return correlationId;
-    }
-
-    public void setCorrelationId(String correlationId) {
-        this.correlationId = correlationId;
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
     }
 
     @Override
     public String toString() {
-        return "RiskAssessment{" + "transactionId='" + transactionId + '\'' + ", accountNumber='"
-                + accountNumber + '\'' + ", riskScore=" + riskScore + ", riskLevel=" + riskLevel
-                + ", recommendation=" + recommendation + ", assessmentTimestamp="
-                + assessmentTimestamp + ", processingTimeMs=" + processingTimeMs + '}';
+        return "RiskAssessment{" + "riskScore=" + riskScore + ", fraudulent=" + fraudulent
+                + ", timestamp=" + timestamp + '}';
     }
 
-    /**
-     * Risk level enumeration for standardized risk categorization.
-     */
-    public enum RiskLevel {
-        @JsonProperty("LOW")
-        LOW("Low risk - transaction appears normal"),
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
-        @JsonProperty("MEDIUM")
-        MEDIUM("Medium risk - requires additional monitoring"),
+        RiskAssessment that = (RiskAssessment) o;
 
-        @JsonProperty("HIGH")
-        HIGH("High risk - requires immediate attention"),
-
-        @JsonProperty("CRITICAL")
-        CRITICAL("Critical risk - potential fraud detected");
-
-        private final String description;
-
-        RiskLevel(String description) {
-            this.description = description;
-        }
-
-        public String getDescription() {
-            return description;
-        }
+        if (riskScore != null ? !riskScore.equals(that.riskScore) : that.riskScore != null)
+            return false;
+        if (fraudulent != null ? !fraudulent.equals(that.fraudulent) : that.fraudulent != null)
+            return false;
+        return timestamp != null ? timestamp.equals(that.timestamp) : that.timestamp == null;
     }
 
-    /**
-     * Processing recommendation enumeration for transaction handling guidance.
-     */
-    public enum Recommendation {
-        @JsonProperty("APPROVE")
-        APPROVE("Approve transaction - low fraud risk"),
-
-        @JsonProperty("REVIEW")
-        REVIEW("Review transaction - moderate risk detected"),
-
-        @JsonProperty("CHALLENGE")
-        CHALLENGE("Challenge customer - additional verification required"),
-
-        @JsonProperty("BLOCK")
-        BLOCK("Block transaction - high fraud risk detected");
-
-        private final String description;
-
-        Recommendation(String description) {
-            this.description = description;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-    }
-
-    /**
-     * Risk factor model representing individual fraud indicators.
-     */
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class RiskFactor {
-
-        @NotBlank(message = "Risk factor type is required")
-        @JsonProperty("type")
-        private String type;
-
-        @NotNull(message = "Risk factor score is required")
-        @DecimalMin(value = "0.0", message = "Risk factor score must be non-negative")
-        @JsonProperty("score")
-        private Double score;
-
-        @JsonProperty("description")
-        private String description;
-
-        @JsonProperty("details")
-        private Map<String, Object> details;
-
-        // Default constructor
-        public RiskFactor() {}
-
-        // Constructor with required fields
-        public RiskFactor(String type, Double score, String description) {
-            this.type = type;
-            this.score = score;
-            this.description = description;
-        }
-
-        // Getters and setters
-        public String getType() {
-            return type;
-        }
-
-        public void setType(String type) {
-            this.type = type;
-        }
-
-        public Double getScore() {
-            return score;
-        }
-
-        public void setScore(Double score) {
-            this.score = score;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-
-        public void setDescription(String description) {
-            this.description = description;
-        }
-
-        public Map<String, Object> getDetails() {
-            return details;
-        }
-
-        public void setDetails(Map<String, Object> details) {
-            this.details = details;
-        }
-
-        @Override
-        public String toString() {
-            return "RiskFactor{" + "type='" + type + '\'' + ", score=" + score + ", description='"
-                    + description + '\'' + '}';
-        }
+    @Override
+    public int hashCode() {
+        int result = riskScore != null ? riskScore.hashCode() : 0;
+        result = 31 * result + (fraudulent != null ? fraudulent.hashCode() : 0);
+        result = 31 * result + (timestamp != null ? timestamp.hashCode() : 0);
+        return result;
     }
 }

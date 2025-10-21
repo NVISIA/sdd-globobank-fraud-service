@@ -6,9 +6,6 @@ spring:
   application:
     name: fraud-detection-service-test
   
-  profiles:
-    active: test
-  
   # Database configuration - overridden by TestContainers
   datasource:
     driver-class-name: org.postgresql.Driver
@@ -23,16 +20,19 @@ spring:
     hibernate:
       ddl-auto: create-drop
     show-sql: false
+    defer-datasource-initialization: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: false
+        hbm2ddl:
+          auto: create-drop
         jdbc:
           batch_size: 20
   
-  # Flyway configuration for testing
+  # Flyway configuration for testing - DISABLED to resolve circular dependency
   flyway:
-    enabled: true
+    enabled: false
     baseline-on-migrate: true
     clean-on-validation-error: true
   

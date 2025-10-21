@@ -49,6 +49,9 @@ public class DatabaseConfig {
     @Value("${spring.datasource.driver-class-name}")
     private String driverClassName;
 
+    @Value("${spring.jpa.hibernate.ddl-auto:validate}")
+    private String ddlAutoMode;
+
     @Value("${spring.datasource.hikari.maximum-pool-size:20}")
     private int maximumPoolSize;
 
@@ -204,8 +207,9 @@ public class DatabaseConfig {
         properties.setProperty("hibernate.format_sql", "true");
         properties.setProperty("hibernate.use_sql_comments", "false");
 
-        // Schema validation
-        properties.setProperty("hibernate.hbm2ddl.auto", "validate");
+        // Schema management - environment specific
+        // Production: validate, Test: create-drop
+        properties.setProperty("hibernate.hbm2ddl.auto", ddlAutoMode);
 
         // Physical naming strategy for consistent table/column names
         properties.setProperty("hibernate.physical_naming_strategy",

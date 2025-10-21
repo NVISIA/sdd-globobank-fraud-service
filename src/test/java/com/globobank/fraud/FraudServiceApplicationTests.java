@@ -1,8 +1,6 @@
 package com.globobank.fraud;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Basic application context test for GloboBank Fraud Detection Service.
@@ -14,9 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
  * @version 1.0.0
  * @since 2025-10-21
  */
-@SpringBootTest
-@ActiveProfiles("test")
-class FraudServiceApplicationTests {
+class FraudServiceApplicationTests extends BaseIntegrationTest {
 
     /**
      * Test that the application context loads successfully. This test verifies basic Spring Boot

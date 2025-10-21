@@ -37,15 +37,15 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T007 Setup PostgreSQL database schema and Flyway migrations in `src/main/resources/db/migration/V1__create_fraudulent_cards_table.sql`
-- [ ] T008 [P] Configure Spring Security OAuth2 + PKCE authentication in `src/main/java/com/globobank/fraud/config/SecurityConfig.java`
-- [ ] T009 [P] Setup database configuration with HikariCP connection pooling in `src/main/java/com/globobank/fraud/config/DatabaseConfig.java`
-- [ ] T010 [P] Create base exception handling framework in `src/main/java/com/globobank/fraud/exception/FraudServiceException.java`
-- [ ] T011 [P] Configure request/response logging with correlation IDs for audit compliance
-- [ ] T012 [P] Setup health check endpoint in `src/main/java/com/globobank/fraud/controller/HealthController.java`
-- [ ] T013 [P] Configure TLS 1.3+ security and rate limiting for API endpoints
-- [ ] T014 [P] Setup JUnit 5 + TestContainers framework for integration testing
-- [ ] T015 [P] Configure performance monitoring and metrics collection for sub-200ms SLA tracking
+- [X] T007 Setup PostgreSQL database schema and Flyway migrations in `src/main/resources/db/migration/V1__create_fraudulent_cards_table.sql`
+- [X] T008 [P] Configure Spring Security OAuth2 + PKCE authentication in `src/main/java/com/globobank/fraud/config/SecurityConfig.java`
+- [X] T009 [P] Setup database configuration with HikariCP connection pooling in `src/main/java/com/globobank/fraud/config/DatabaseConfig.java`
+- [X] T010 [P] Create base exception handling framework in `src/main/java/com/globobank/fraud/exception/FraudServiceException.java`
+- [X] T011 [P] Configure request/response logging with correlation IDs for audit compliance (LoggingConfig.java implemented)
+- [X] T012 [P] Setup health check endpoint in `src/main/java/com/globobank/fraud/controller/HealthController.java` (implemented)
+- [X] T013 [P] Configure TLS 1.3+ security and rate limiting for API endpoints (application.yml configured)
+- [X] T014 [P] Setup JUnit 5 + TestContainers framework for integration testing (BaseIntegrationTest.java implemented)
+- [X] T015 [P] Configure performance monitoring and metrics collection for sub-200ms SLA tracking (application.yml metrics configured)
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -59,13 +59,13 @@
 
 ### Implementation for User Story 1
 
-- [ ] T016 [P] [US1] Create `TransactionRequest` model in `src/main/java/com/globobank/fraud/model/TransactionRequest.java` with UUID and credit card validation
-- [ ] T017 [P] [US1] Create `RiskAssessment` model in `src/main/java/com/globobank/fraud/model/RiskAssessment.java` with risk score and fraud determination fields
-- [ ] T018 [US1] Implement `FraudController` in `src/main/java/com/globobank/fraud/controller/FraudController.java` with POST `/risk-assessments` endpoint (depends on T016, T017)
-- [ ] T019 [US1] Add Bean Validation annotations and error handling for invalid requests (400 Bad Request responses)
-- [ ] T020 [US1] Configure JSON serialization/deserialization with proper timestamp formatting (ISO 8601)
-- [ ] T021 [US1] Add request/response logging with correlation IDs for audit trail
-- [ ] T022 [US1] Implement basic input validation: UUID format for transaction ID, 13-19 digits for credit card number
+- [X] T016 [P] [US1] Create `TransactionRequest` model in `src/main/java/com/globobank/fraud/model/TransactionRequest.java` with UUID and credit card validation (implemented with Bean Validation)
+- [X] T017 [P] [US1] Create `RiskAssessment` model in `src/main/java/com/globobank/fraud/model/RiskAssessment.java` with risk score and fraud determination fields (implemented with validation)
+- [X] T018 [US1] Implement `FraudController` in `src/main/java/com/globobank/fraud/controller/FraudController.java` with POST `/risk-assessments` endpoint (implemented as RiskAssessmentController)
+- [X] T019 [US1] Add Bean Validation annotations and error handling for invalid requests (400 Bad Request responses) (implemented in models and controller)
+- [X] T020 [US1] Configure JSON serialization/deserialization with proper timestamp formatting (ISO 8601) (implemented with Jackson annotations)
+- [X] T021 [US1] Add request/response logging with correlation IDs for audit trail (implemented in LoggingConfig.java)
+- [X] T022 [US1] Implement basic input validation: UUID format for transaction ID, 13-19 digits for credit card number (implemented in TransactionRequest.java)
 
 **Checkpoint**: At this point, User Story 1 should provide a functional API endpoint that accepts requests and returns properly formatted responses
 
@@ -79,13 +79,13 @@
 
 ### Implementation for User Story 2
 
-- [ ] T023 [P] [US2] Create `FraudulentCard` entity in `src/main/java/com/globobank/fraud/model/FraudulentCard.java` with JPA annotations
-- [ ] T024 [P] [US2] Create `FraudulentCardRepository` interface in `src/main/java/com/globobank/fraud/repository/FraudulentCardRepository.java` with Spring Data JPA
-- [ ] T025 [US2] Implement `FraudDetectionService` in `src/main/java/com/globobank/fraud/service/FraudDetectionService.java` with fraud rule logic (depends on T024)
-- [ ] T026 [US2] Integrate fraud detection service with controller to perform actual risk scoring (depends on T025)
-- [ ] T027 [US2] Implement business logic: 1000 risk score for fraudulent cards, 0 for clean cards
-- [ ] T028 [US2] Add fraud determination logic: set fraudulent=true when risk score > 1000
-- [ ] T029 [US2] Add fail-safe behavior: return 0 risk score on database errors with error logging
+- [X] T023 [P] [US2] Create `FraudulentCard` entity in `src/main/java/com/globobank/fraud/model/FraudulentCard.java` with JPA annotations (implemented with proper table and indexes)
+- [X] T024 [P] [US2] Create `FraudulentCardRepository` interface in `src/main/java/com/globobank/fraud/repository/FraudulentCardRepository.java` with Spring Data JPA (implemented with custom queries)
+- [X] T025 [US2] Implement `FraudDetectionService` in `src/main/java/com/globobank/fraud/service/FraudDetectionService.java` with fraud rule logic (implemented with comprehensive logic)
+- [X] T026 [US2] Integrate fraud detection service with controller to perform actual risk scoring (implemented in RiskAssessmentController)
+- [X] T027 [US2] Implement business logic: 1000 risk score for fraudulent cards, 0 for clean cards (implemented in FraudDetectionService)
+- [X] T028 [US2] Add fraud determination logic: set fraudulent=true when risk score > 1000 (implemented with boolean flag logic)
+- [X] T029 [US2] Add fail-safe behavior: return 0 risk score on database errors with error logging (implemented with try-catch and logging)
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should work together to provide actual fraud detection functionality
 
