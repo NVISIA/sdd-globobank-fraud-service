@@ -5,6 +5,16 @@
 **Status**: Draft  
 **Input**: User description: "Build the minimal architecture enablers for getting a Java, Spring Boot service implemented that can process a transaction and score it for fraud. Implement a single, happy-path transaction flow that processes a fraud rule."
 
+## Clarifications
+
+### Session 2025-10-21
+
+- Q: API Request/Response Format → A: Request: `{"transactionId": "string", "creditCardNumber": "string"}` Response: `{"riskScore": number, "fraudulent": boolean, "timestamp": "ISO8601"}`
+- Q: Credit Card Number Validation → A: Length validation only (13-19 digits, numeric only)
+- Q: Configuration Update Mechanism → A: Database table storage for fraudulent cards with positive matches lookup (not configuration-based)
+- Q: Database Connection Failure Handling → A: Fail safe - assign 0 risk score, log error, allow transaction
+- Q: Transaction ID Format and Validation → A: UUID format (standard 36-character format)
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Basic Transaction Processing API (Priority: P1)
@@ -25,56 +35,58 @@ A transaction processing system can submit a transaction (transaction ID and cre
 
 ### User Story 2 - Known Fraudulent Card Detection Rule (Priority: P2)
 
-The fraud service applies a simple rule that checks if a credit card number exists in a predefined list of known fraudulent cards and assigns appropriate risk scores (1000 for fraudulent, 0 for clean).
+The fraud service applies a simple rule that checks if a credit card number exists in a database table of known fraudulent cards and assigns appropriate risk scores (1000 for fraudulent, 0 for clean).
 
 **Why this priority**: This implements the core business logic for fraud detection and provides immediate business value by blocking known bad cards.
 
-**Independent Test**: Can be tested by configuring known fraudulent cards and verifying that transactions with those cards receive 1000 risk points while other cards receive 0 points.
+**Independent Test**: Can be tested by inserting known fraudulent cards into the database table and verifying that transactions with those cards receive 1000 risk points while other cards receive 0 points.
 
 **Acceptance Scenarios**:
 
-1. **Given** a transaction with a credit card number in the known fraudulent cards list, **When** risk scoring is performed, **Then** the transaction receives 1000 risk points and fraudulent status
-2. **Given** a transaction with a credit card number not in the fraudulent cards list, **When** risk scoring is performed, **Then** the transaction receives 0 risk points and non-fraudulent status
-3. **Given** the fraudulent cards list is empty, **When** any transaction is processed, **Then** the transaction receives 0 risk points and non-fraudulent status
+1. **Given** a transaction with a credit card number in the known fraudulent cards database table, **When** risk scoring is performed, **Then** the transaction receives 1000 risk points and fraudulent status
+2. **Given** a transaction with a credit card number not in the fraudulent cards table, **When** risk scoring is performed, **Then** the transaction receives 0 risk points and non-fraudulent status
+3. **Given** the fraudulent cards table is empty, **When** any transaction is processed, **Then** the transaction receives 0 risk points and non-fraudulent status
 
 ---
 
-### User Story 3 - Basic Configuration Management (Priority: P3)
+### User Story 3 - Database-Driven Fraud Detection (Priority: P3)
 
-The fraud service can be configured with a list of known fraudulent credit card numbers through application configuration, enabling operational teams to update fraud rules without code changes.
+The fraud service queries a database table containing known fraudulent credit card numbers to determine risk scores, enabling operational teams to manage fraudulent cards through database operations.
 
-**Why this priority**: This provides operational flexibility and enables the service to be configured for different environments without rebuilding the application.
+**Why this priority**: This provides operational flexibility and enables the service to access current fraud intelligence through database queries without service restarts.
 
-**Independent Test**: Can be tested by updating the configuration file with different fraudulent card numbers and verifying that the service applies the updated rules correctly after restart.
+**Independent Test**: Can be tested by adding/removing fraudulent card numbers in the database table and verifying that the service applies the updated rules immediately for new transactions.
 
 **Acceptance Scenarios**:
 
-1. **Given** fraudulent card numbers configured in application properties, **When** the service starts, **Then** the configuration is loaded and used for fraud rule evaluation
-2. **Given** configuration contains malformed credit card numbers, **When** the service starts, **Then** an error is logged and only valid card numbers are loaded
-3. **Given** no fraudulent cards are configured, **When** transactions are processed, **Then** all transactions receive 0 risk points
+1. **Given** fraudulent card numbers stored in the database table, **When** transactions are processed, **Then** the database is queried and matching cards receive appropriate risk scores
+2. **Given** database connection is unavailable, **When** a transaction is processed, **Then** an error is logged and the transaction receives 0 risk points with appropriate error handling
+3. **Given** new fraudulent cards are added to the database, **When** transactions with those cards are processed, **Then** they receive 1000 risk points immediately
 
 ---
 
 ### Edge Cases
 
-- What happens when the credit card number format is invalid? (System logs validation error and assigns 0 risk score)
+- What happens when the credit card number format is invalid? (System validates length 13-19 digits numeric only, logs validation error and assigns 0 risk score for invalid formats)
 - How does the system handle empty or null transaction requests? (Returns 400 Bad Request with appropriate error message)
 - What occurs when the service is overloaded with requests? (Implements basic rate limiting and returns 503 Service Unavailable when capacity is exceeded)
+- What happens when the database is unavailable during fraud lookup? (System logs database error, assigns 0 risk score, and allows transaction to proceed with fail-safe behavior)
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001**: System MUST provide a REST API endpoint to accept transaction data (transaction ID and credit card number)
-- **FR-002**: System MUST return a JSON response containing risk score and fraud determination for each transaction
-- **FR-003**: System MUST implement a fraud rule that checks credit card numbers against a known fraudulent cards list
-- **FR-004**: System MUST assign 1000 risk points when credit card number matches known fraudulent cards list
-- **FR-005**: System MUST assign 0 risk points when credit card number is not in fraudulent cards list  
+- **FR-001**: System MUST provide a REST API endpoint to accept transaction data with request format: `{"transactionId": "string", "creditCardNumber": "string"}`
+- **FR-002**: System MUST return a JSON response with format: `{"riskScore": number, "fraudulent": boolean, "timestamp": "ISO8601"}` containing risk score and fraud determination for each transaction
+- **FR-003**: System MUST implement a fraud rule that checks credit card numbers against a database table of known fraudulent cards
+- **FR-004**: System MUST assign 1000 risk points when credit card number matches known fraudulent cards table
+- **FR-005**: System MUST assign 0 risk points when credit card number is not in fraudulent cards table  
 - **FR-006**: System MUST mark transactions as fraudulent when risk score exceeds 1000 points
-- **FR-007**: System MUST validate transaction request format and return appropriate error responses for invalid data
-- **FR-008**: System MUST load known fraudulent credit card numbers from application configuration
-- **FR-009**: System MUST log all transaction processing requests and responses for audit purposes
-- **FR-010**: System MUST implement basic health check endpoint for service monitoring
+- **FR-007**: System MUST validate transaction request format and return appropriate error responses for invalid data (transaction IDs must be valid UUID format, credit card numbers must be 13-19 digits, numeric only)
+- **FR-008**: System MUST query fraudulent cards database table for positive matches during risk evaluation
+- **FR-009**: System MUST handle database connection failures by assigning 0 risk score, logging errors, and allowing transaction processing to continue
+- **FR-010**: System MUST log all transaction processing requests and responses for audit purposes
+- **FR-011**: System MUST implement basic health check endpoint for service monitoring
 
 ### Fraud Service Compliance Requirements *(mandatory)*
 
@@ -86,10 +98,10 @@ The fraud service can be configured with a list of known fraudulent credit card 
 
 ### Key Entities *(include if feature involves data)*
 
-- **TransactionRequest**: Contains transaction ID and credit card number submitted for fraud scoring
+- **TransactionRequest**: Contains transaction ID (UUID format) and credit card number submitted for fraud scoring
 - **RiskAssessment**: Contains calculated risk score, fraud determination, and processing timestamp for a transaction
 - **FraudRule**: Represents the business logic for evaluating transaction fraud risk based on credit card status
-- **FraudulentCard**: Represents a credit card number that is known to be associated with fraudulent activity
+- **FraudulentCard**: Database table entity representing credit card numbers known to be associated with fraudulent activity
 
 ## Success Criteria *(mandatory)*
 

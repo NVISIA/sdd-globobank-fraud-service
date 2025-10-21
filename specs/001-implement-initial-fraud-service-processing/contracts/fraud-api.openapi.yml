@@ -1,0 +1,402 @@
+openapi: 3.0.3
+info:
+  title: GloboBank Fraud Detection Service API
+  description: |
+    Fraud detection microservice providing real-time transaction risk assessment.
+    
+    This API processes transaction data and returns risk scores based on known fraudulent 
+    credit card patterns. Designed for sub-second response times with fail-safe behavior 
+    during system errors.
+    
+    **Security**: All endpoints require OAuth 2.0 authentication with PKCE.
+    **Performance**: Target response time <200ms for 95% of requests.
+    **Compliance**: PCI-DSS Level 1, GDPR, and financial services regulations compliant.
+  version: 1.0.0
+  contact:
+    name: GloboBank Fraud Detection Team
+    email: fraud-dev@globobank.com
+  license:
+    name: Proprietary
+    url: https://globobank.com/licenses/fraud-service
+
+servers:
+  - url: https://api.globobank.com/fraud/v1
+    description: Production environment
+  - url: https://api-staging.globobank.com/fraud/v1
+    description: Staging environment
+  - url: http://localhost:8080/fraud/v1
+    description: Local development environment
+
+security:
+  - OAuth2PKCE:
+      - fraud:assess
+      - fraud:read
+
+paths:
+  /risk-assessments:
+    post:
+      summary: Create Transaction Risk Assessment
+      description: |
+        Creates a new risk assessment for a transaction by evaluating fraud risk 
+        through credit card validation against known fraudulent cards database.
+        
+        **Business Logic**:
+        - Risk Score 0: Credit card not in fraudulent cards database
+        - Risk Score 1000: Credit card matches known fraudulent card
+        - Fraudulent flag: true when risk score > 1000, false otherwise
+        
+        **Error Handling**:
+        - Database errors result in 0 risk score (fail-safe behavior)
+        - Invalid input returns 400 Bad Request with validation details
+        - System errors return 500 Internal Server Error
+      operationId: createRiskAssessment
+      tags:
+        - Fraud Detection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionRequest'
+            examples:
+              valid_transaction:
+                summary: Valid transaction request
+                value:
+                  transactionId: "550e8400-e29b-41d4-a716-446655440000"
+                  creditCardNumber: "4532015112830366"
+              clean_card:
+                summary: Clean credit card (not fraudulent)
+                value:
+                  transactionId: "123e4567-e89b-12d3-a456-426614174000"
+                  creditCardNumber: "4000000000000002"
+      responses:
+        '200':
+          description: Risk assessment completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskAssessment'
+              examples:
+                clean_transaction:
+                  summary: Clean transaction (0 risk score)
+                  value:
+                    riskScore: 0
+                    fraudulent: false
+                    timestamp: "2025-10-21T14:30:00.000Z"
+                fraudulent_transaction:
+                  summary: Fraudulent transaction (1000 risk score)
+                  value:
+                    riskScore: 1000
+                    fraudulent: true
+                    timestamp: "2025-10-21T14:30:00.000Z"
+        '400':
+          description: Invalid request format or validation failure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalid_transaction_id:
+                  summary: Invalid transaction ID format
+                  value:
+                    error: "VALIDATION_ERROR"
+                    message: "Transaction ID must be valid UUID format"
+                    timestamp: "2025-10-21T14:30:00.000Z"
+                    correlationId: "req-123e4567-e89b-12d3-a456-426614174000"
+                invalid_card_number:
+                  summary: Invalid credit card number format
+                  value:
+                    error: "VALIDATION_ERROR"
+                    message: "Credit card number must be 13-19 digits, numeric only"
+                    timestamp: "2025-10-21T14:30:00.000Z"
+                    correlationId: "req-123e4567-e89b-12d3-a456-426614174000"
+        '401':
+          description: Authentication required or invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                unauthorized:
+                  summary: Missing or invalid authentication
+                  value:
+                    error: "UNAUTHORIZED"
+                    message: "Valid OAuth 2.0 token required"
+                    timestamp: "2025-10-21T14:30:00.000Z"
+                    correlationId: "req-123e4567-e89b-12d3-a456-426614174000"
+        '403':
+          description: Insufficient permissions for fraud assessment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                forbidden:
+                  summary: Insufficient scope for fraud assessment
+                  value:
+                    error: "FORBIDDEN"
+                    message: "Scope 'fraud:assess' required for transaction risk assessment"
+                    timestamp: "2025-10-21T14:30:00.000Z"
+                    correlationId: "req-123e4567-e89b-12d3-a456-426614174000"
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                rate_limited:
+                  summary: Too many requests from client
+                  value:
+                    error: "RATE_LIMIT_EXCEEDED"
+                    message: "Rate limit of 100 requests per minute exceeded"
+                    timestamp: "2025-10-21T14:30:00.000Z"
+                    correlationId: "req-123e4567-e89b-12d3-a456-426614174000"
+        '500':
+          description: Internal server error during fraud assessment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                internal_error:
+                  summary: Unexpected system error
+                  value:
+                    error: "INTERNAL_ERROR"
+                    message: "An unexpected error occurred during fraud assessment"
+                    timestamp: "2025-10-21T14:30:00.000Z"
+                    correlationId: "req-123e4567-e89b-12d3-a456-426614174000"
+        '503':
+          description: Service temporarily unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                service_unavailable:
+                  summary: Service maintenance or overload
+                  value:
+                    error: "SERVICE_UNAVAILABLE"
+                    message: "Fraud detection service temporarily unavailable"
+                    timestamp: "2025-10-21T14:30:00.000Z"
+                    correlationId: "req-123e4567-e89b-12d3-a456-426614174000"
+
+  /health:
+    get:
+      summary: Service Health Check
+      description: |
+        Returns the health status of the fraud detection service including 
+        database connectivity and system readiness.
+      operationId: getHealthStatus
+      tags:
+        - Health
+      security: []  # No authentication required for health checks
+      responses:
+        '200':
+          description: Service is healthy and operational
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+              examples:
+                healthy:
+                  summary: All systems operational
+                  value:
+                    status: "UP"
+                    timestamp: "2025-10-21T14:30:00.000Z"
+                    components:
+                      database: "UP"
+                      fraud-rules: "UP"
+        '503':
+          description: Service is unhealthy or partially operational
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+              examples:
+                unhealthy:
+                  summary: Database connectivity issues
+                  value:
+                    status: "DOWN"
+                    timestamp: "2025-10-21T14:30:00.000Z"
+                    components:
+                      database: "DOWN"
+                      fraud-rules: "UP"
+
+components:
+  schemas:
+    TransactionRequest:
+      type: object
+      required:
+        - transactionId
+        - creditCardNumber
+      properties:
+        transactionId:
+          type: string
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+          description: UUID format transaction identifier
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        creditCardNumber:
+          type: string
+          pattern: '^[0-9]{13,19}$'
+          description: Credit card number for fraud assessment (13-19 digits, numeric only)
+          example: "4532015112830366"
+      additionalProperties: false
+
+    RiskAssessment:
+      type: object
+      required:
+        - riskScore
+        - fraudulent
+        - timestamp
+      properties:
+        riskScore:
+          type: integer
+          minimum: 0
+          maximum: 1000
+          description: Risk score on 0-1000 scale (1000 = confirmed fraud)
+          example: 0
+        fraudulent:
+          type: boolean
+          description: Binary fraud determination (true when risk score > 1000)
+          example: false
+        timestamp:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp of risk assessment completion (UTC)
+          example: "2025-10-21T14:30:00.000Z"
+      additionalProperties: false
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+        - timestamp
+        - correlationId
+      properties:
+        error:
+          type: string
+          enum:
+            - VALIDATION_ERROR
+            - UNAUTHORIZED
+            - FORBIDDEN
+            - RATE_LIMIT_EXCEEDED
+            - INTERNAL_ERROR
+            - SERVICE_UNAVAILABLE
+          description: Error category for programmatic handling
+          example: "VALIDATION_ERROR"
+        message:
+          type: string
+          description: Human-readable error description
+          example: "Transaction ID must be valid UUID format"
+        timestamp:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp when error occurred (UTC)
+          example: "2025-10-21T14:30:00.000Z"
+        correlationId:
+          type: string
+          description: Unique identifier for error tracking and support
+          example: "req-123e4567-e89b-12d3-a456-426614174000"
+      additionalProperties: false
+
+    HealthStatus:
+      type: object
+      required:
+        - status
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum:
+            - UP
+            - DOWN
+            - UNKNOWN
+          description: Overall service health status
+          example: "UP"
+        timestamp:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp of health check (UTC)
+          example: "2025-10-21T14:30:00.000Z"
+        components:
+          type: object
+          description: Health status of individual service components
+          properties:
+            database:
+              type: string
+              enum:
+                - UP
+                - DOWN
+                - UNKNOWN
+              description: Database connectivity status
+              example: "UP"
+            fraud-rules:
+              type: string
+              enum:
+                - UP
+                - DOWN
+                - UNKNOWN
+              description: Fraud detection rules engine status
+              example: "UP"
+          additionalProperties: false
+      additionalProperties: false
+
+  securitySchemes:
+    OAuth2PKCE:
+      type: oauth2
+      description: |
+        OAuth 2.0 with PKCE (Proof Key for Code Exchange) for secure API access.
+        Required scopes:
+        - fraud:assess: Permission to submit transactions for fraud assessment
+        - fraud:read: Permission to read fraud assessment results
+      flows:
+        authorizationCode:
+          authorizationUrl: https://auth.globobank.com/oauth2/authorize
+          tokenUrl: https://auth.globobank.com/oauth2/token
+          scopes:
+            fraud:assess: Submit transactions for fraud risk assessment
+            fraud:read: Read fraud assessment results and status
+
+  responses:
+    BadRequest:
+      description: Invalid request format or validation failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: Authentication required or invalid credentials
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Forbidden:
+      description: Insufficient permissions for requested operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: Internal server error during processing
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    ServiceUnavailable:
+      description: Service temporarily unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+tags:
+  - name: Fraud Detection
+    description: Transaction fraud risk assessment operations
+  - name: Health
+    description: Service health monitoring and status endpoints
