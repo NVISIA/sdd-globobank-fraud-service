@@ -31,7 +31,15 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- [ ] **Real-Time Fraud Detection**: Feature supports sub-second response times and real-time processing requirements
+- [ ] **Multi-Layered Defense**: Implementation includes multiple independent detection/validation layers  
+- [ ] **Test-Driven Security Development**: TDD approach planned with security-focused test scenarios (90%+ coverage)
+- [ ] **Data Privacy and Compliance**: GDPR, PCI-DSS, and financial regulations compliance verified in design
+- [ ] **Explainable AI**: If using ML/AI, models provide explainable decisions with audit trails
+- [ ] **API Security**: OAuth 2.0 + PKCE authentication and TLS 1.3+ transport security implemented
+- [ ] **Microservices Architecture**: Service follows domain-driven design with clear bounded contexts
+- [ ] **Cloud-Native**: AWS-first design with Infrastructure as Code (Terraform) approach
+- [ ] **Performance Standards**: Sub-second response time targets and 99.9% availability SLA addressed
 
 ## Project Structure
 

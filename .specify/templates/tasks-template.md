@@ -12,11 +12,13 @@ description: "Task list template for feature implementation"
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
 ## Format: `[ID] [P?] [Story] Description`
+
 - **[P]**: Can run in parallel (different files, no dependencies)
 - **[Story]**: Which user story this task belongs to (e.g., US1, US2, US3)
 - Include exact file paths in descriptions
 
 ## Path Conventions
+
 - **Single project**: `src/`, `tests/` at repository root
 - **Web app**: `backend/src/`, `frontend/src/`
 - **Mobile**: `api/src/`, `ios/src/` or `android/src/`
@@ -60,13 +62,25 @@ description: "Task list template for feature implementation"
 Examples of foundational tasks (adjust based on your project):
 
 - [ ] T004 Setup database schema and migrations framework
-- [ ] T005 [P] Implement authentication/authorization framework
-- [ ] T006 [P] Setup API routing and middleware structure
+- [ ] T005 [P] Implement OAuth 2.0 + PKCE authentication framework
+- [ ] T006 [P] Setup API routing with TLS 1.3+ security and rate limiting
 - [ ] T007 Create base models/entities that all stories depend on
-- [ ] T008 Configure error handling and logging infrastructure
-- [ ] T009 Setup environment configuration management
+- [ ] T008 Configure error handling, audit logging, and compliance tracking
+- [ ] T009 Setup environment configuration with AWS secrets management
 
-**Checkpoint**: Foundation ready - user story implementation can now begin in parallel
+### Fraud Service Compliance Tasks (Constitution Required)
+
+- [ ] T010 [P] [FSC] Configure real-time event streaming with Apache Kafka
+- [ ] T011 [P] [FSC] Implement multi-layered security validation pipeline
+- [ ] T012 [P] [FSC] Setup TDD framework with security-focused test scenarios (JUnit 5 + Mockito)
+- [ ] T013 [P] [FSC] Configure PCI-DSS, GDPR compliance monitoring and audit trails
+- [ ] T014 [P] [FSC] Setup explainable AI model framework with decision tracking
+- [ ] T015 [P] [FSC] Configure microservices architecture with domain boundaries
+- [ ] T016 [P] [FSC] Setup AWS Infrastructure as Code with Terraform
+- [ ] T017 [P] [FSC] Implement performance monitoring for sub-second response SLA
+- [ ] T018 [P] [FSC] Configure automated security scanning and vulnerability detection
+
+**Checkpoint**: Foundation + Fraud Service Compliance ready - user story implementation can now begin in parallel
 
 ---
 
@@ -246,5 +260,3 @@ With multiple developers:
 - Commit after each task or logical group
 - Stop at any checkpoint to validate story independently
 - Avoid: vague tasks, same file conflicts, cross-story dependencies that break independence
-
-

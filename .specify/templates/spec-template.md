@@ -95,6 +95,18 @@
 - **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
 - **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
 
+### Fraud Service Compliance Requirements *(mandatory)*
+
+- **FSC-001**: Real-Time Processing MUST respond within sub-second latency for fraud detection
+- **FSC-002**: Multi-Layered Defense MUST implement independent detection/validation layers
+- **FSC-003**: Security Controls MUST implement OAuth 2.0 + PKCE authentication and TLS 1.3+ transport
+- **FSC-004**: Data Privacy MUST comply with PCI-DSS, GDPR, CCPA, and financial regulations (BSA/AML, FFIEC)
+- **FSC-005**: AI/ML Models MUST provide explainable decisions with complete audit trails
+- **FSC-006**: API Design MUST follow microservices architecture with domain-driven design principles
+- **FSC-007**: Infrastructure MUST be cloud-native (AWS-first) with Infrastructure as Code (Terraform)
+- **FSC-008**: Testing MUST follow TDD with 90%+ code coverage and security-focused test scenarios
+- **FSC-009**: Performance MUST meet 99.9% availability SLA with horizontal scalability support
+
 ### Key Entities *(include if feature involves data)*
 
 - **[Entity 1]**: [What it represents, key attributes without implementation]
