@@ -37,11 +37,11 @@ Build minimal architecture enablers for a Java Spring Boot fraud service that ca
 
 **Post-Phase 1 Re-check**: ✅ PASSED - Design phase completed, all requirements maintained
 
-- [x] **Real-Time Fraud Detection**: Feature supports sub-second response times and real-time processing requirements (sub-200ms target)
-- [x] **Multi-Layered Defense**: Implementation includes multiple independent detection/validation layers (input validation, fraud rule checking, fail-safe handling)  
+- [x] **Real-Time Fraud Detection**: Feature supports sub-second response times and real-time processing requirements (sub-200ms target). Note: Apache Kafka event streaming will be addressed in a future architecture enabler feature specification.
+- [x] **Multi-Layered Defense**: Implementation includes foundational detection layers (input validation, fraud rule checking, fail-safe handling). Additional layers including device fingerprinting, behavioral biometrics, and geolocation verification will be implemented in future feature specifications.  
 - [x] **Test-Driven Security Development**: TDD approach planned with security-focused test scenarios (90%+ coverage with JUnit 5, TestContainers)
 - [x] **Data Privacy and Compliance**: GDPR, PCI-DSS, and financial regulations compliance verified in design (credit card tokenization planned, audit logging)
-- [ ] **Explainable AI**: If using ML/AI, models provide explainable decisions with audit trails (N/A for initial rule-based implementation)
+- [x] **Explainable AI**: Rule-based approach for MVP provides transparent decision logic. Machine learning models for behavioral analysis will be implemented in future feature specifications as the product evolves beyond minimal viable product.
 - [x] **API Security**: OAuth 2.0 + PKCE authentication and TLS 1.3+ transport security implemented (Spring Security OAuth2)
 - [x] **Microservices Architecture**: Service follows domain-driven design with clear bounded contexts (fraud detection bounded context)
 - [x] **Cloud-Native**: AWS-first design with Infrastructure as Code (Terraform) approach (EKS deployment planned)

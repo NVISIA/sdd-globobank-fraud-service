@@ -10,7 +10,7 @@
 ### Session 2025-10-21
 
 - Q: API Request/Response Format → A: Request: `{"transactionId": "string", "creditCardNumber": "string"}` Response: `{"riskScore": number, "fraudulent": boolean, "timestamp": "ISO8601"}`
-- Q: Credit Card Number Validation → A: Length validation only (13-19 digits, numeric only)
+- Q: Credit Card Number Validation → A: Length validation (13-19 digits, numeric only) and Luhn algorithm checksum validation for MVP. Advanced validation will be enhanced in future iterations.
 - Q: Configuration Update Mechanism → A: Database table storage for fraudulent cards with positive matches lookup (not configuration-based)
 - Q: Database Connection Failure Handling → A: Fail safe - assign 0 risk score, log error, allow transaction
 - Q: Transaction ID Format and Validation → A: UUID format (standard 36-character format)
@@ -81,8 +81,8 @@ The fraud service queries a database table containing known fraudulent credit ca
 - **FR-003**: System MUST implement a fraud rule that checks credit card numbers against a database table of known fraudulent cards
 - **FR-004**: System MUST assign 1000 risk points when credit card number matches known fraudulent cards table
 - **FR-005**: System MUST assign 0 risk points when credit card number is not in fraudulent cards table  
-- **FR-006**: System MUST mark transactions as fraudulent when risk score exceeds 1000 points
-- **FR-007**: System MUST validate transaction request format and return appropriate error responses for invalid data (transaction IDs must be valid UUID format, credit card numbers must be 13-19 digits, numeric only)
+- **FR-006**: System MUST mark transactions as fraudulent when risk score is greater than or equal to 1000 points
+- **FR-007**: System MUST validate transaction request format and return appropriate error responses for invalid data (transaction IDs must be valid UUID format, credit card numbers must be 13-19 digits numeric only with valid Luhn checksum)
 - **FR-008**: System MUST query fraudulent cards database table for positive matches during risk evaluation
 - **FR-009**: System MUST handle database connection failures by assigning 0 risk score, logging errors, and allowing transaction processing to continue
 - **FR-010**: System MUST log all transaction processing requests and responses for audit purposes
