@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  fraud-postgres:
+    image: postgres:15-alpine
+    container_name: fraud-postgres
+    environment:
+      POSTGRES_DB: frauddb
+      POSTGRES_USER: frauduser
+      POSTGRES_PASSWORD: fraudpass
+      POSTGRES_INITDB_ARGS: "--auth-host=md5"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./src/main/resources/db/migration:/docker-entrypoint-initdb.d
+    networks:
+      - fraud-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U frauduser -d frauddb" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  # Fraud Detection Service
+  fraud-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fraud-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://fraud-postgres:5432/frauddb
+      - SPRING_DATASOURCE_USERNAME=frauduser
+      - SPRING_DATASOURCE_PASSWORD=fraudpass
+    ports:
+      - "8080:8080"
+    depends_on:
+      fraud-postgres:
+        condition: service_healthy
+    networks:
+      - fraud-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/fraud/v1/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+    volumes:
+      - ./logs:/app/logs
+
+  # Redis for Caching (future enhancement)
+  fraud-redis:
+    image: redis:7-alpine
+    container_name: fraud-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - fraud-network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+
+networks:
+  fraud-network:
+    driver: bridge
+    name: fraud-network
+
+volumes:
+  postgres_data:
+    driver: local
+    name: fraud_postgres_data
+  redis_data:
+    driver: local
+    name: fraud_redis_data

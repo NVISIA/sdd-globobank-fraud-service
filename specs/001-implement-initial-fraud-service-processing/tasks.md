@@ -22,12 +22,12 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Create Maven project structure with Java 17 and Spring Boot 3.x dependencies in `pom.xml`
-- [ ] T002 [P] Create main application class `src/main/java/com/globobank/fraud/FraudServiceApplication.java`
-- [ ] T003 [P] Create base package structure: `config/`, `controller/`, `service/`, `repository/`, `model/`, `exception/`
-- [ ] T004 [P] Configure application properties: `src/main/resources/application.yml`, `application-dev.yml`, `application-prod.yml`
-- [ ] T005 [P] Create Docker configuration: `Dockerfile` and `docker-compose.yml` for local development
-- [ ] T006 [P] Setup Terraform infrastructure structure: `terraform/main.tf`, `terraform/variables.tf`, `terraform/outputs.tf`
+- [X] T001 Create Maven project structure with Java 17 and Spring Boot 3.x dependencies in `pom.xml`
+- [X] T002 [P] Create main application class `src/main/java/com/globobank/fraud/FraudServiceApplication.java`
+- [X] T003 [P] Create base package structure: `config/`, `controller/`, `service/`, `repository/`, `model/`, `exception/`
+- [X] T004 [P] Configure application properties: `src/main/resources/application.yml`, `application-dev.yml`, `application-prod.yml`
+- [X] T005 [P] Create Docker configuration: `Dockerfile` and `docker-compose.yml` for local development
+- [X] T006 [P] Setup Terraform infrastructure structure: `terraform/main.tf`, `terraform/variables.tf`, `terraform/outputs.tf`
 
 ---
 

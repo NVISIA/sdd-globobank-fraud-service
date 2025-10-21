@@ -1,0 +1,98 @@
+# Java
+*.class
+*.log
+*.ctxt
+.mtj.tmp/
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Package Files
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Spring Boot
+*.pid
+*.pid.lock
+spring-configuration-metadata.json
+
+# IDE
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/
+.settings/
+.project
+.classpath
+.metadata
+
+# OS
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Test
+test-output/
+*.log
+*.tlog
+
+# Application
+logs/
+application.log
+application-*.log
+
+# Database
+*.db
+*.h2.db
+*.lock.db
+*.trace.db
+
+# Security
+*.p12
+*.jks
+*.keystore
+
+# Docker
+.dockerignore
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+*.tfvars
+.terraform.tfstate.lock.info
+crash.log
+crash.*.log

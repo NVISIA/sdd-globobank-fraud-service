@@ -1,0 +1,98 @@
+spring:
+  profiles:
+    active: prod
+  
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${DATABASE_URL:jdbc:postgresql://fraud-db.cluster-xyz.region.rds.amazonaws.com:5432/frauddb}
+    username: ${DATABASE_USERNAME:frauduser}
+    password: ${DATABASE_PASSWORD}
+    hikari:
+      maximum-pool-size: 50
+      minimum-idle: 20
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      leak-detection-threshold: 60000
+  
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          time_zone: UTC
+        connection:
+          provider_disables_autocommit: true
+  
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: false
+    validate-on-migrate: true
+    out-of-order: false
+
+server:
+  ssl:
+    enabled: true
+    protocol: TLS
+    enabled-protocols: TLSv1.3
+  compression:
+    enabled: true
+    mime-types: application/json,text/css,text/html
+  http2:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: never
+  health:
+    circuitbreakers:
+      enabled: true
+  metrics:
+    export:
+      cloudwatch:
+        enabled: true
+        namespace: GloboBank/FraudService
+
+logging:
+  level:
+    com.globobank.fraud: INFO
+    org.springframework.security: WARN
+    org.springframework.web: WARN
+    org.hibernate: WARN
+    org.testcontainers: WARN
+  file:
+    name: /var/log/fraud-service/application.log
+  logback:
+    rollingpolicy:
+      max-file-size: 1GB
+      max-history: 90
+      total-size-cap: 10GB
+
+# Production security configuration
+fraud:
+  detection:
+    default-timeout: 3000
+    circuit-breaker:
+      failure-rate-threshold: 30
+      wait-duration-in-open-state: 60000
+      permitted-number-of-calls-in-half-open-state: 5
+      minimum-number-of-calls: 20
+  security:
+    rate-limit:
+      requests-per-minute: 100
+    cors:
+      allowed-origins: 
+        - "https://app.globobank.com"
+        - "https://admin.globobank.com"
+      allowed-methods: "GET,POST,OPTIONS"
+      allowed-headers: "Authorization,Content-Type,X-Correlation-ID"
+      max-age: 3600

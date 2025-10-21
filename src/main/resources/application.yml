@@ -1,0 +1,129 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /fraud/v1
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+  http2:
+    enabled: true
+  ssl:
+    enabled: false  # Set to true in production with proper certificates
+    protocol: TLS
+    enabled-protocols: TLSv1.3
+    ciphers: TLS_AES_256_GCM_SHA384,TLS_CHACHA20_POLY1305_SHA256,TLS_AES_128_GCM_SHA256
+  tomcat:
+    connection-timeout: 20000
+    keep-alive-timeout: 60000
+    max-keep-alive-requests: 100
+    max-connections: 8192
+    threads:
+      max: 200
+      min-spare: 10
+    accept-count: 100
+
+spring:
+  application:
+    name: fraud-detection-service
+  
+  profiles:
+    active: default
+  
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: password
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1200000
+  
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+    defer-datasource-initialization: true
+  
+  flyway:
+    enabled: false
+  
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081/auth/realms/globobank
+          jwk-set-uri: http://localhost:8081/auth/realms/globobank/protocol/openid-connect/certs
+  
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+    default-property-inclusion: non_null
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+      show-components: always
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  health:
+    circuitbreakers:
+      enabled: true
+    db:
+      enabled: true
+  metrics:
+    distribution:
+      percentiles-histogram:
+        "[fraud.risk.assessment.duration]": true
+        "[fraud.api.response.duration]": true
+      percentiles:
+        "[fraud.risk.assessment.duration]": 0.5,0.9,0.95,0.99
+        "[fraud.api.response.duration]": 0.5,0.9,0.95,0.99
+    export:
+      prometheus:
+        enabled: true
+
+logging:
+  level:
+    com.globobank.fraud: INFO
+    org.springframework.security: WARN
+    org.springframework.web: WARN
+    org.hibernate.SQL: WARN
+    org.hibernate.type: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{correlationId}] %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{correlationId}] %logger{36} - %msg%n"
+
+# Application-specific configuration
+fraud:
+  detection:
+    default-timeout: 5000
+    circuit-breaker:
+      failure-rate-threshold: 50
+      wait-duration-in-open-state: 30000
+      permitted-number-of-calls-in-half-open-state: 3
+      minimum-number-of-calls: 10
+  security:
+    rate-limit:
+      requests-per-minute: 100
+    cors:
+      allowed-origins: "*"
+      allowed-methods: "GET,POST,PUT,DELETE,OPTIONS"
+      allowed-headers: "*"
+      max-age: 3600
