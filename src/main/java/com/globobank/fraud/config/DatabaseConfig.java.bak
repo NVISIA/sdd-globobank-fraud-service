@@ -1,25 +1,27 @@
 package com.globobank.fraud.config;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
+/*
+ * Temporarily disabled custom database configuration to use Spring Boot auto-configuration Enable
+ * this when you need custom connection pooling and circuit breaker configuration
+ */
 
-import javax.sql.DataSource;
-import java.time.Duration;
-import java.util.Properties;
-
-/**
- * Database configuration for GloboBank Fraud Detection Service.
+/*
+ * import com.zaxxer.hikari.HikariConfig; import com.zaxxer.hikari.HikariDataSource; import
+ * io.github.resilience4j.circuitbreaker.CircuitBreaker; import
+ * io.github.resilience4j.circuitbreaker.CircuitBreakerConfig; import
+ * org.springframework.beans.factory.annotation.Value; import
+ * org.springframework.context.annotation.Bean; import
+ * org.springframework.context.annotation.Configuration; import
+ * org.springframework.context.annotation.Primary; import
+ * org.springframework.data.jpa.repository.config.EnableJpaRepositories; import
+ * org.springframework.orm.jpa.JpaTransactionManager; import
+ * org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean; import
+ * org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter; import
+ * org.springframework.transaction.annotation.EnableTransactionManagement;
+ * 
+ * import javax.sql.DataSource; import java.time.Duration; import java.util.Properties;
+ * 
+ * /** Database configuration for GloboBank Fraud Detection Service.
  * 
  * Configures HikariCP connection pooling, JPA/Hibernate settings, and database resilience patterns
  * for optimal performance and reliability.
@@ -29,7 +31,9 @@ import java.util.Properties;
  * management configuration - Connection leak detection for production monitoring
  * 
  * @author GloboBank Fraud Detection Team
+ * 
  * @version 1.0.0
+ * 
  * @since 2025-10-21
  */
 @Configuration
